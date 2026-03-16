@@ -1,35 +1,82 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from "react";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
-function App() {
-  const [count, setCount] = useState(0)
+import LoginPage from "./pages/Login";
+import RegisterPage from "./pages/Register";
+import DashboardPage from "./pages/Dashboard";
+import WorkoutsPage from "./pages/Workouts";
+import NewWorkoutPage from "./pages/NewWorkout";
+import WorkoutDetailPage from "./pages/WorkoutDetail";
+
+function AppInside() {
+  const auth = useAuth();
+
+  const [page, setPage] = useState("login");
+  const [selectedWorkout, setSelectedWorkout] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!auth.loading) {
+      if (auth.isLogged) {
+        setPage("dashboard");
+      } else {
+        setPage("login");
+      }
+    }
+  }, [auth.loading, auth.isLogged]);
+
+  function goTo(newPage: string) {
+    const privatePages = ["dashboard", "workouts", "newWorkout", "workoutDetail"];
+
+    if (privatePages.includes(newPage) && !auth.isLogged) {
+      setPage("login");
+      return;
+    }
+
+    if ((newPage === "login" || newPage === "register") && auth.isLogged) {
+      setPage("dashboard");
+      return;
+    }
+
+    setPage(newPage);
+  }
+
+  if (auth.loading) {
+    return (
+      <div className="container">
+        <p>Načítání...</p>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="container">
+      {page === "login" && !auth.isLogged && <LoginPage goTo={goTo} />}
+      {page === "register" && !auth.isLogged && <RegisterPage goTo={goTo} />}
+      {page === "dashboard" && auth.isLogged && <DashboardPage goTo={goTo} />}
+
+      {page === "workouts" && auth.isLogged && (
+        <WorkoutsPage
+          goTo={goTo}
+          openWorkout={(id: number) => {
+            setSelectedWorkout(id);
+            setPage("workoutDetail");
+          }}
+        />
+      )}
+
+      {page === "newWorkout" && auth.isLogged && <NewWorkoutPage goTo={goTo} />}
+
+      {page === "workoutDetail" && auth.isLogged && selectedWorkout !== null && (
+        <WorkoutDetailPage id={selectedWorkout} goTo={goTo} />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppInside />
+    </AuthProvider>
+  );
+}
