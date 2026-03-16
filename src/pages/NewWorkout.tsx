@@ -10,12 +10,13 @@ export default function NewWorkoutPage({ goTo }: any) {
     e.preventDefault();
 
     try {
-      await createWorkout(date, type, note);
+      const data = await createWorkout(date, type, note);
+      console.log("CREATED:", data);
       alert("Trénink byl vytvořen");
       goTo("workouts");
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      alert("Nepodařilo se uložit trénink");
+      alert(err.message || "Nepodařilo se vytvořit trénink");
     }
   }
 
@@ -24,17 +25,13 @@ export default function NewWorkoutPage({ goTo }: any) {
       <h1>Přidat trénink</h1>
 
       <div className="buttons" style={{ marginBottom: "15px" }}>
-        <button onClick={() => goTo("dashboard")}>Dashboard</button>
-        <button onClick={() => goTo("workouts")}>Moje tréninky</button>
+        <button type="button" onClick={() => goTo("dashboard")}>Dashboard</button>
+        <button type="button" onClick={() => goTo("workouts")}>Moje tréninky</button>
       </div>
 
       <form onSubmit={handleSubmit}>
         <label>Datum</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
 
         <label>Typ tréninku</label>
         <select value={type} onChange={(e) => setType(e.target.value)}>

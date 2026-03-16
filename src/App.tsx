@@ -58,6 +58,7 @@ function AppInside() {
         <WorkoutsPage
           goTo={goTo}
           openWorkout={(id: number) => {
+            console.log("OPEN WORKOUT:", id);
             setSelectedWorkout(id);
             setPage("workoutDetail");
           }}

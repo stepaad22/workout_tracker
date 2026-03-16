@@ -26,13 +26,14 @@ export default function WorkoutDetailPage({ id, goTo }: any) {
   async function loadWorkout() {
     try {
       const data = await getWorkoutDetail(id);
+      console.log("DETAIL:", data);
       setWorkout(data);
       setEditDate(data.date || "");
       setEditType(data.type || "push");
       setEditNote(data.note || "");
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      alert("Nepodařilo se načíst detail");
+      alert(err.message || "Nepodařilo se načíst detail");
     }
   }
 
@@ -41,11 +42,11 @@ export default function WorkoutDetailPage({ id, goTo }: any) {
 
     try {
       await updateWorkout(id, editDate, editType, editNote);
-      await loadWorkout();
       alert("Trénink upraven");
-    } catch (err) {
+      await loadWorkout();
+    } catch (err: any) {
       console.log(err);
-      alert("Nepodařilo se upravit trénink");
+      alert(err.message || "Nepodařilo se upravit trénink");
     }
   }
 
@@ -54,14 +55,15 @@ export default function WorkoutDetailPage({ id, goTo }: any) {
 
     try {
       await addExerciseToWorkout(id, name, sets, reps, weight);
+      alert("Cvik přidán");
       setName("");
       setSets(3);
       setReps(10);
       setWeight(0);
       await loadWorkout();
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      alert("Nepodařilo se přidat cvik");
+      alert(err.message || "Nepodařilo se přidat cvik");
     }
   }
 
@@ -69,9 +71,9 @@ export default function WorkoutDetailPage({ id, goTo }: any) {
     try {
       await removeExercise(exerciseId);
       await loadWorkout();
-    } catch (err) {
+    } catch (err: any) {
       console.log(err);
-      alert("Nepodařilo se smazat cvik");
+      alert(err.message || "Nepodařilo se smazat cvik");
     }
   }
 
@@ -84,8 +86,8 @@ export default function WorkoutDetailPage({ id, goTo }: any) {
       <h1>Detail tréninku</h1>
 
       <div className="buttons" style={{ marginBottom: "15px" }}>
-        <button onClick={() => goTo("dashboard")}>Dashboard</button>
-        <button onClick={() => goTo("workouts")}>Zpět na tréninky</button>
+        <button type="button" onClick={() => goTo("dashboard")}>Dashboard</button>
+        <button type="button" onClick={() => goTo("workouts")}>Zpět na tréninky</button>
       </div>
 
       <div className="card">
@@ -122,7 +124,9 @@ export default function WorkoutDetailPage({ id, goTo }: any) {
                   Série: {item.sets}, opakování: {item.reps}, váha: {item.weight} kg
                 </p>
               </div>
-              <button onClick={() => handleDeleteExercise(item.id)}>Smazat</button>
+              <button type="button" onClick={() => handleDeleteExercise(item.id)}>
+                Smazat
+              </button>
             </div>
           ))
         ) : (
