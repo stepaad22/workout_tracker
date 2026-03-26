@@ -45,6 +45,10 @@ function getTokenData($secret_key) {
         return null;
     }
 
+    if (!isset($data["user_id"])) {
+        return null;
+    }
+
     if (!isset($data["exp"]) || $data["exp"] < time()) {
         return null;
     }

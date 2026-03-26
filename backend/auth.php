@@ -5,12 +5,17 @@ error_reporting(E_ALL);
 require_once dirname(__FILE__) . "/db.php";
 
 function makeToken($userId) {
+    global $secret_key;
+
     $data = array(
         "user_id" => (int)$userId,
         "exp" => time() + 60 * 60 * 24
     );
 
-    return base64_encode(json_encode($data));
+    $base = base64_encode(json_encode($data));
+    $hash = hash_hmac("sha256", $base, $secret_key);
+
+    return $base . "." . $hash;
 }
 
 $action = "";

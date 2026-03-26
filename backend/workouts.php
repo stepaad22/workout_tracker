@@ -5,6 +5,8 @@ error_reporting(E_ALL);
 require_once dirname(__FILE__) . "/db.php";
 
 function getTokenData() {
+    global $secret_key;
+
     $headers = getallheaders();
     $auth = "";
 
@@ -18,8 +20,18 @@ function getTokenData() {
     if (strpos($auth, "Bearer ") !== 0) return null;
 
     $token = substr($auth, 7);
-    $decoded = base64_decode($token);
-    $data = json_decode($decoded, true);
+    $parts = explode(".", $token);
+
+    if (count($parts) !== 2) return null;
+
+    $base = $parts[0];
+    $hash = $parts[1];
+
+    $checkHash = hash_hmac("sha256", $base, $secret_key);
+
+    if ($checkHash !== $hash) return null;
+
+    $data = json_decode(base64_decode($base), true);
 
     if (!$data) return null;
     if (!isset($data["user_id"])) return null;
